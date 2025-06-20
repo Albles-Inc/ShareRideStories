@@ -14,19 +14,29 @@ function SharePageContent() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const plateFromUrl = searchParams.get('plate')
+  const isEditMode = searchParams.get('edit') === 'true'
+  const editStoryId = searchParams.get('id')
   
   const [plateNumber, setPlateNumber] = useState(plateFromUrl || '')
   const [story, setStory] = useState('')
   const [location, setLocation] = useState('')
   const [rating, setRating] = useState<Rating>('neutral')
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [updateError, setUpdateError] = useState<string | null>(null)
   
   const { createStory, loading: isSubmitting, error } = useCreateStory()
 
+  // Pre-populate form in edit mode
   useEffect(() => {
-    if (plateFromUrl) {
+    if (isEditMode) {
+      setPlateNumber(searchParams.get('plateNumber') || '')
+      setStory(searchParams.get('story') || '')
+      setLocation(searchParams.get('location') || '')
+      setRating((searchParams.get('rating') as Rating) || 'neutral')
+    } else if (plateFromUrl) {
       setPlateNumber(plateFromUrl)
     }
-  }, [plateFromUrl])
+  }, [plateFromUrl, isEditMode, searchParams])
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -35,7 +45,46 @@ function SharePageContent() {
     }
   }, [status, router, plateFromUrl])
 
+  const handleUpdate = async () => {
+    if (!story.trim() || !plateNumber.trim() || !editStoryId || isUpdating) return
+
+    setIsUpdating(true)
+    setUpdateError(null)
+
+    try {
+      const response = await fetch(`/api/stories/${editStoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plateNumber: plateNumber.toUpperCase(),
+          story: story.trim(),
+          location: location.trim() || undefined,
+          rating
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Redirect back to profile
+        router.push('/profile')
+      } else {
+        setUpdateError(data.error || 'Failed to update story')
+      }
+    } catch (err) {
+      setUpdateError('Network error')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
   const handleSubmit = async () => {
+    if (isEditMode) {
+      return handleUpdate()
+    }
+
     if (!story.trim() || !plateNumber.trim() || isSubmitting) return
 
     const newStory = await createStory({
@@ -72,11 +121,19 @@ function SharePageContent() {
           </div>
         </div>
       ) : (
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
           <div className="text-center mb-8">
-            <div className="text-4xl mb-4">✍️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Share Your Experience</h2>
-            <p className="text-gray-600">Help others in the community by sharing your ride story</p>
+            <div className="text-4xl mb-4">{isEditMode ? '✏️' : '✍️'}</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {isEditMode ? 'Edit Your Story' : 'Share Your Experience'}
+            </h2>
+            <p className="text-gray-600">
+              {isEditMode 
+                ? 'Update your ride story with any changes'
+                : 'Help others in the community by sharing your ride story'
+              }
+            </p>
           </div>
 
           <div className="space-y-6">
@@ -151,27 +208,28 @@ function SharePageContent() {
               />
             </div>
 
-            {error && (
+            {(error || updateError) && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                {error}
+                {error || updateError}
               </div>
             )}
 
             <button
               onClick={handleSubmit}
-              disabled={!story.trim() || !plateNumber.trim() || isSubmitting}
+              disabled={!story.trim() || !plateNumber.trim() || isSubmitting || isUpdating}
               className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
             >
-              {isSubmitting ? (
+              {(isSubmitting || isUpdating) ? (
                 <>
                   <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                  Sharing Story...
+                  {isEditMode ? 'Updating Story...' : 'Sharing Story...'}
                 </>
               ) : (
-                'Share Story'
+                isEditMode ? 'Update Story' : 'Share Story'
               )}
             </button>
           </div>
+        </div>
         </div>
       )}
     </div>

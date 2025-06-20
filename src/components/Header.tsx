@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
-import { useState } from 'react'
 
 interface HeaderProps {
   title?: string
@@ -14,7 +13,6 @@ interface HeaderProps {
 export default function Header({ title, showBack = false, showShareButton = true }: HeaderProps) {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const [showUserMenu, setShowUserMenu] = useState(false)
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' })
@@ -63,33 +61,24 @@ export default function Header({ title, showBack = false, showShareButton = true
               {status === 'loading' ? (
                 <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
               ) : session ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                <>
+                  <Link
+                    href="/profile"
+                    className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                    <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                       {session.user.email?.[0].toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                      {session.user.email}
-                    </span>
-                  </button>
+                    <span className="text-sm font-medium hidden sm:block">Profile</span>
+                  </Link>
                   
-                  {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{session.user.email}</p>
-                      </div>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-sm font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <Link
                   href="/auth"
@@ -111,14 +100,6 @@ export default function Header({ title, showBack = false, showShareButton = true
           {!showShareButton && !title && <div></div>}
         </div>
       </div>
-
-      {/* Click outside to close user menu */}
-      {showUserMenu && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setShowUserMenu(false)}
-        />
-      )}
     </div>
   )
 }

@@ -1,55 +1,117 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { Story } from '@/types'
-import { useUserStories } from '@/hooks/useUserStories'
-import { formatDate, getRatingColor, getRatingEmoji } from '@/utils'
 import Header from '@/components/Header'
 import Loading from '@/components/Loading'
 
 export default function ProfilePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const { stories, loading, error, fetchUserStories, deleteStory } = useUserStories()
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [stories, setStories] = useState<Story[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth')
-    } else if (status === 'authenticated' && session?.user?.email) {
-      fetchUserStories()
-    }
-  }, [status, session?.user?.email, fetchUserStories])
-
-  const handleEdit = (story: Story) => {
-    // Store story data for editing
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('editingStory', JSON.stringify(story))
-    }
-    router.push(`/share?edit=${story.id}`)
-  }
-
-  const handleDelete = async (storyId: string) => {
-    if (!confirm('Are you sure you want to delete this story? This action cannot be undone.')) {
+      router.push('/auth?callbackUrl=' + encodeURIComponent('/profile'))
       return
     }
 
-    setDeletingId(storyId)
-    const success = await deleteStory(storyId)
-    setDeletingId(null)
+    if (status === 'authenticated') {
+      fetchUserStories()
+    }
+  }, [status, router])
 
-    if (!success) {
-      alert('Failed to delete story. Please try again.')
+  const fetchUserStories = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/user/stories')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      if (!text) {
+        throw new Error('Empty response from server')
+      }
+      
+      const data = JSON.parse(text)
+      
+      if (data.success) {
+        setStories(data.data.map((story: any) => ({
+          ...story,
+          timestamp: new Date(story.timestamp)
+        })))
+      } else {
+        setError(data.error || 'Failed to fetch stories')
+      }
+    } catch (err) {
+      setError('Network error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEdit = (story: Story) => {
+    // Navigate to share page with pre-populated data
+    const params = new URLSearchParams({
+      edit: 'true',
+      id: story.id,
+      plateNumber: story.plateNumber,
+      story: story.story,
+      location: story.location || '',
+      rating: story.rating
+    })
+    router.push(`/share?${params.toString()}`)
+  }
+
+  const handleDelete = async (storyId: string) => {
+    if (!confirm('Are you sure you want to delete this story?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/stories/${storyId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Remove the story from local state
+        setStories(stories.filter(story => story.id !== storyId))
+      } else {
+        alert(data.error || 'Failed to delete story')
+      }
+    } catch (err) {
+      alert('Network error')
+    }
+  }
+
+  const getRatingColor = (rating: string) => {
+    switch (rating) {
+      case 'positive': return 'text-green-600 bg-green-100'
+      case 'negative': return 'text-red-600 bg-red-100'
+      default: return 'text-yellow-600 bg-yellow-100'
+    }
+  }
+
+  const getRatingEmoji = (rating: string) => {
+    switch (rating) {
+      case 'positive': return '😊'
+      case 'negative': return '😞'
+      default: return '😐'
     }
   }
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Header showBack={true} showShareButton={false} />
+        <Header showBack={true} />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
           <Loading message="Loading profile..." />
         </div>
@@ -57,23 +119,8 @@ export default function ProfilePage() {
     )
   }
 
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Header showBack={true} showShareButton={false} />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-          <div className="text-center">
-            <p className="text-gray-600 mb-4">You need to be signed in to view your profile.</p>
-            <Link
-              href="/auth"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+  if (status === 'unauthenticated') {
+    return null // Will redirect
   }
 
   return (
@@ -83,32 +130,52 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Profile Header */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100 mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {session.user.email?.[0].toUpperCase()}
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+              {session?.user?.email?.[0].toUpperCase()}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Your Profile</h1>
-              <p className="text-gray-600">{session.user.email}</p>
+              <p className="text-gray-600">{session?.user?.email}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-blue-50 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">{stories.length}</div>
+              <div className="text-sm text-blue-700">Total Stories</div>
+            </div>
+            <div className="bg-green-50 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {stories.reduce((sum, story) => sum + story.upvotes, 0)}
+              </div>
+              <div className="text-sm text-green-700">Total Upvotes</div>
+            </div>
+            <div className="bg-purple-50 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {new Set(stories.map(story => story.plateNumber)).size}
+              </div>
+              <div className="text-sm text-purple-700">Unique Plates</div>
             </div>
           </div>
         </div>
 
         {/* Stories Section */}
-        <div className="mb-8">
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Your Stories</h2>
-            <span className="text-sm text-gray-500">
-              {stories.length} stor{stories.length !== 1 ? 'ies' : 'y'} shared
-            </span>
+            <h2 className="text-xl font-bold text-gray-900">Your Stories</h2>
+            <button
+              onClick={() => router.push('/share')}
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-xl hover:shadow-lg transition-all duration-200"
+            >
+              Add New Story
+            </button>
           </div>
 
           {loading ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
-              <Loading message="Loading your stories..." />
-            </div>
+            <Loading message="Loading your stories..." />
           ) : error ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 text-center">
+            <div className="text-center py-8">
               <p className="text-red-600 mb-4">{error}</p>
               <button 
                 onClick={fetchUserStories} 
@@ -118,65 +185,58 @@ export default function ProfilePage() {
               </button>
             </div>
           ) : stories.length === 0 ? (
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-100">
+            <div className="text-center py-12">
               <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No stories yet</h3>
-              <p className="text-gray-600 mb-6">You haven't shared any ride experiences yet.</p>
-              <Link
-                href="/share"
-                className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Stories Yet</h3>
+              <p className="text-gray-600 mb-6">
+                Share your first ride experience to help the community!
+              </p>
+              <button
+                onClick={() => router.push('/share')}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
               >
                 Share Your First Story
-              </Link>
+              </button>
             </div>
           ) : (
             <div className="space-y-4">
               {stories.map((story) => (
-                <div key={story.id} className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200">
+                <div key={story.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-mono text-sm font-bold text-gray-700">
-                        {story.plateNumber.slice(-2)}
+                      <div className="text-lg font-mono font-bold bg-gray-100 px-3 py-1 rounded-lg">
+                        {story.plateNumber}
                       </div>
-                      <div>
-                        <div className="font-mono text-sm font-semibold text-gray-900">{story.plateNumber}</div>
-                        <div className="text-xs text-gray-500">{story.location}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getRatingColor(story.rating)}`}>
-                        {getRatingEmoji(story.rating)}
-                        <span className="ml-1 capitalize">{story.rating}</span>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(story.rating)}`}>
+                        {getRatingEmoji(story.rating)} {story.rating}
                       </span>
                     </div>
-                  </div>
-                  
-                  <p className="text-gray-700 mb-4 leading-relaxed">{story.story}</p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1 text-gray-500">
-                        <span className="text-lg">👍</span>
-                        <span className="text-sm font-medium">{story.upvotes}</span>
-                      </div>
-                      <span className="text-sm text-gray-500">{formatDate(story.timestamp)}</span>
-                    </div>
-                    
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleEdit(story)}
-                        className="px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 text-sm font-medium"
+                        className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(story.id)}
-                        disabled={deletingId === story.id}
-                        className="px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 text-sm font-medium disabled:opacity-50"
+                        className="px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm"
                       >
-                        {deletingId === story.id ? 'Deleting...' : 'Delete'}
+                        Delete
                       </button>
                     </div>
+                  </div>
+                  
+                  <p className="text-gray-700 mb-4">{story.story}</p>
+                  
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center space-x-4">
+                      {story.location && (
+                        <span>📍 {story.location}</span>
+                      )}
+                      <span>👍 {story.upvotes} upvotes</span>
+                    </div>
+                    <span>{story.timestamp.toLocaleDateString()}</span>
                   </div>
                 </div>
               ))}
