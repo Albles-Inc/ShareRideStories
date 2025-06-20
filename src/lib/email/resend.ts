@@ -75,9 +75,7 @@ function generateSignUpEmail(email: string, url: string): string {
       <div style="background-color: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);">
         <div style="text-align: center; margin-bottom: 30px;">
           <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              🚗
-            </div>
+            <img src="https://www.shareridestories.com/logo.png" alt="ShareRideStories Logo" style="width: 48px; height: 48px; border-radius: 12px; object-fit: contain;" />
             <h1 style="margin: 0; font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #1f2937, #6b7280); background-clip: text; -webkit-background-clip: text; color: transparent;">
               ShareRideStories
             </h1>
@@ -140,9 +138,7 @@ function generateSignInEmail(email: string, url: string): string {
       <div style="background-color: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);">
         <div style="text-align: center; margin-bottom: 30px;">
           <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-            <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              🚗
-            </div>
+            <img src="https://www.shareridestories.com/logo.png" alt="ShareRideStories Logo" style="width: 48px; height: 48px; border-radius: 12px; object-fit: contain;" />
             <h1 style="margin: 0; font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #1f2937, #6b7280); background-clip: text; -webkit-background-clip: text; color: transparent;">
               ShareRideStories
             </h1>
@@ -196,9 +192,7 @@ export async function sendWelcomeEmail(email: string, name?: string) {
           <div style="background-color: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);">
             <div style="text-align: center; margin-bottom: 30px;">
               <div style="display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                  🚗
-                </div>
+                <img src="https://www.shareridestories.com/logo.png" alt="ShareRideStories Logo" style="width: 48px; height: 48px; border-radius: 12px; object-fit: contain;" />
                 <h1 style="margin: 0; font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #1f2937, #6b7280); background-clip: text; -webkit-background-clip: text; color: transparent;">
                   ShareRideStories
                 </h1>
