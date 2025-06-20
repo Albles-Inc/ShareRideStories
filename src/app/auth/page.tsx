@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 // Separate component for the search params logic
 function SignInContent() {
@@ -75,8 +76,14 @@ function SignInContent() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">🚗</span>
+            <div className="w-12 h-12 relative">
+              <Image
+                src="/logo.png"
+                alt="ShareRideStories Logo"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
             </div>
             <div className="text-left">
               <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
@@ -174,9 +181,18 @@ function SignInContent() {
 
         {/* Additional Info */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mb-3">
             By continuing, you agree to help build a safer ride-sharing community.
           </p>
+          <div className="flex flex-col sm:flex-row gap-2 justify-center text-xs">
+            <Link href="/terms" className="text-gray-400 hover:text-gray-600 transition-colors">
+              Terms of Service
+            </Link>
+            <span className="hidden sm:inline text-gray-300">•</span>
+            <Link href="/about" className="text-gray-400 hover:text-gray-600 transition-colors">
+              About Us
+            </Link>
+          </div>
         </div>
 
         {/* Back to Home */}

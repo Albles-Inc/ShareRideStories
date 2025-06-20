@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -14,8 +15,14 @@ function VerifyRequestContent() {
         {/* Logo */}
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">🚗</span>
+            <div className="w-12 h-12 relative">
+              <Image
+                src="/logo.png"
+                alt="ShareRideStories Logo"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
             </div>
             <div className="text-left">
               <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">

@@ -160,6 +160,21 @@ export default function HomePage() {
             Share Your Story
           </Link>
         </div>
+
+        {/* Footer Links */}
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-gray-500">
+            <Link href="/about" className="hover:text-gray-700 transition-colors">
+              About ShareRideStories
+            </Link>
+            <Link href="/terms" className="hover:text-gray-700 transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-gray-400">
+              © {new Date().getFullYear()} ShareRideStories
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   )
