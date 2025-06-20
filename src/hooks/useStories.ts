@@ -23,7 +23,23 @@ export function useStories(plateNumber?: string) {
       if (plateNumber) params.append('plate', plateNumber)
       
       const response = await fetch(`/api/stories?${params}`)
-      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      if (!text || text.trim() === '') {
+        throw new Error('Empty response from server')
+      }
+      
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response text:', text)
+        throw new Error('Invalid JSON response from server')
+      }
       
       if (data.success) {
         setStories(data.data.map((story: any) => ({
@@ -58,7 +74,7 @@ export function useCreateStory() {
   const [error, setError] = useState<string | null>(null)
 
   const createStory = async (storyData: CreateStoryData): Promise<Story | null> => {
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       setError('You must be signed in to post a story')
       return null
     }
@@ -75,7 +91,22 @@ export function useCreateStory() {
         body: JSON.stringify(storyData),
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      if (!text || text.trim() === '') {
+        throw new Error('Empty response from server')
+      }
+      
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response text:', text)
+        throw new Error('Invalid JSON response from server')
+      }
 
       if (data.success) {
         return {
@@ -114,7 +145,22 @@ export function useUpvoteStory() {
         method: 'PATCH',
       })
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      if (!text || text.trim() === '') {
+        throw new Error('Empty response from server')
+      }
+      
+      let data
+      try {
+        data = JSON.parse(text)
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError, 'Response text:', text)
+        throw new Error('Invalid JSON response from server')
+      }
 
       if (data.success) {
         return {

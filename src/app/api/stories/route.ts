@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
+      .lean()
 
-    const transformedStories = stories.map(transformStoryFromDB)
+    const transformedStories = stories.map((story: any) => transformStoryFromDB(story))
 
     return NextResponse.json({
       success: true,
