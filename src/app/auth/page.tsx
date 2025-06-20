@@ -71,7 +71,7 @@ function SignInContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8">
+      <div className="max-w-md w-full bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3">
@@ -87,11 +87,11 @@ function SignInContent() {
           </Link>
         </div>
 
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             {isSignUp ? 'Join the Community' : 'Welcome Back'}
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             {isSignUp
               ? 'Create your account to start sharing ride experiences'
               : 'Sign in to share and discover ride stories'
@@ -136,7 +136,7 @@ function SignInContent() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-black"
               placeholder="your@email.com"
               required
               disabled={isLoading}

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { Story } from '@/types'
 import { useStories, useUpvoteStory } from '@/hooks/useStories'
 import Header from '@/components/Header'
@@ -19,6 +20,60 @@ export default function HomePage() {
     )
   })
 
+  // Animation state for the title
+  const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [displayedText, setDisplayedText] = useState('')
+  const [isTyping, setIsTyping] = useState(true)
+  const [showCursor, setShowCursor] = useState(true)
+  const textOptions = [
+    "Know Before You",
+    "Know During Your", 
+    "Let Others Know Your"
+  ]
+
+  useEffect(() => {
+    const currentText = textOptions[currentTextIndex]
+    let currentCharIndex = 0
+    
+    if (isTyping) {
+      // Typing effect with variable speed for more natural feel
+      const typingInterval = setInterval(() => {
+        if (currentCharIndex <= currentText.length) {
+          setDisplayedText(currentText.slice(0, currentCharIndex))
+          currentCharIndex++
+        } else {
+          clearInterval(typingInterval)
+          // Hide cursor briefly at end, then show for pause
+          setShowCursor(false)
+          setTimeout(() => {
+            setShowCursor(true)
+            setTimeout(() => setIsTyping(false), 1500)
+          }, 200)
+        }
+      }, Math.random() * 100 + 80) // Variable typing speed 80-180ms
+      
+      return () => clearInterval(typingInterval)
+    } else {
+      // Smooth erasing effect
+      const erasingInterval = setInterval(() => {
+        if (currentCharIndex >= 0) {
+          setDisplayedText(currentText.slice(0, currentCharIndex))
+          currentCharIndex--
+        } else {
+          clearInterval(erasingInterval)
+          // Brief pause before next text
+          setTimeout(() => {
+            setCurrentTextIndex((prev) => (prev + 1) % textOptions.length)
+            setIsTyping(true)
+            setShowCursor(true)
+          }, 300)
+        }
+      }, 40) // Fast erase
+      
+      return () => clearInterval(erasingInterval)
+    }
+  }, [currentTextIndex, isTyping])
+
   const handleUpvote = async (storyId: string) => {
     await upvoteStory(storyId)
     // No need to reload or refetch - the callback will update the state
@@ -32,32 +87,40 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Hero Section - Always show immediately */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
             <span>Building safer rides together</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-            Know Before You
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight px-2">
+            <span className="inline-block relative">
+              <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                {displayedText}
+              </span>
+              <span 
+                className={`inline-block w-0.5 h-[0.9em] bg-gradient-to-b from-blue-500 to-purple-600 ml-1 ${showCursor ? 'animate-pulse' : 'opacity-0'} transition-opacity duration-200`}
+                style={{ animation: showCursor ? 'pulse 1s ease-in-out infinite' : 'none' }}
+              ></span>
+            </span>
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Ride</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed px-4">
             Share and discover real experiences with ride-hailing drivers. Check license plates, read community feedback, and help others stay safe.
           </p>
           
           {/* Search Bar - Always show immediately */}
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto px-4">
             <SearchBar />
           </div>
         </div>
 
         {/* Recent Stories Section - Only this part shows loading */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">Recent Community Stories</h3>
-            <span className="text-sm text-gray-500">Latest feedback from riders</span>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">Recent Community Stories</h3>
+            <span className="text-xs sm:text-sm text-gray-500">Latest feedback from riders</span>
           </div>
           
           {/* Only show loading/error in this section */}
@@ -85,14 +148,14 @@ export default function HomePage() {
         </div>
 
         {/* CTA Section - Always show immediately */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-center text-white">
-          <h3 className="text-2xl font-bold mb-4">Help Build a Safer Community</h3>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center text-white">
+          <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Help Build a Safer Community</h3>
+          <p className="text-blue-100 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
             Your experiences matter. Share your ride stories to help fellow passengers make informed decisions and stay safe.
           </p>
           <Link
             href="/share"
-            className="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+            className="inline-block px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-blue-600 font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
           >
             Share Your Story
           </Link>

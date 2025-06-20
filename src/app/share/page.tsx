@@ -105,7 +105,7 @@ function SharePageContent() {
       <Header showBack={true} showShareButton={false} />
 
       {status === 'loading' ? (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <Loading message="Loading..." />
         </div>
       ) : !session ? (
@@ -121,14 +121,14 @@ function SharePageContent() {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
-          <div className="text-center mb-8">
-            <div className="text-4xl mb-4">{isEditMode ? '✏️' : '✍️'}</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-gray-100">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">{isEditMode ? '✏️' : '✍️'}</div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
               {isEditMode ? 'Edit Your Story' : 'Share Your Experience'}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               {isEditMode 
                 ? 'Update your ride story with any changes'
                 : 'Help others in the community by sharing your ride story'
@@ -146,7 +146,7 @@ function SharePageContent() {
                 value={plateNumber}
                 onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
                 placeholder="e.g. GR-1234-24"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 font-mono text-black"
                 disabled={!!plateFromUrl}
               />
               {plateFromUrl && (
@@ -164,7 +164,7 @@ function SharePageContent() {
                 value={story}
                 onChange={(e) => setStory(e.target.value)}
                 placeholder="Describe your experience with this driver... Be honest and helpful to the community."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-black"
                 rows={6}
                 maxLength={500}
               />
@@ -204,7 +204,7 @@ function SharePageContent() {
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. East Legon to Airport"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-black"
               />
             </div>
 
