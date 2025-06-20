@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Story } from '@/types'
 import { useStories, useUpvoteStory } from '@/hooks/useStories'
 import Header from '@/components/Header'
@@ -10,6 +12,8 @@ import StoryList from '@/components/StoryList'
 import Loading from '@/components/Loading'
 
 export default function HomePage() {
+  const { data: session } = useSession()
+  const router = useRouter()
   const { stories, loading, error, setStories } = useStories()
   const { upvoteStory } = useUpvoteStory((updatedStory) => {
     // Update only the specific story in the list
@@ -19,6 +23,20 @@ export default function HomePage() {
       )
     )
   })
+
+  const handleSignInClick = () => {
+    console.log('Sign In clicked')
+    router.push('/auth')
+  }
+
+  const handleShareClick = () => {
+    console.log('Share Story clicked, session:', session)
+    if (!session) {
+      router.push('/auth?callbackUrl=' + encodeURIComponent('/share'))
+    } else {
+      router.push('/share')
+    }
+  }
 
   // Animation state for the title
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
@@ -110,6 +128,27 @@ export default function HomePage() {
             Share and discover real experiences with ride-hailing drivers. Check license plates, read community feedback, and help others stay safe.
           </p>
           
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6 sm:mb-8 px-4">
+            {!session ? (
+              <button
+                onClick={handleSignInClick}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                type="button"
+              >
+                Sign In to Share Stories
+              </button>
+            ) : (
+              <button
+                onClick={handleShareClick}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                type="button"
+              >
+                Share Your Story
+              </button>
+            )}
+          </div>
+          
           {/* Search Bar - Always show immediately */}
           <div className="max-w-md mx-auto px-4">
             <SearchBar />
@@ -153,12 +192,13 @@ export default function HomePage() {
           <p className="text-blue-100 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
             Your experiences matter. Share your ride stories to help fellow passengers make informed decisions and stay safe.
           </p>
-          <Link
-            href="/share"
+          <button
+            onClick={handleShareClick}
             className="inline-block px-6 sm:px-8 py-2.5 sm:py-3 bg-white text-blue-600 font-semibold rounded-lg sm:rounded-xl hover:shadow-lg transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
+            type="button"
           >
             Share Your Story
-          </Link>
+          </button>
         </div>
 
         {/* Footer Links */}
