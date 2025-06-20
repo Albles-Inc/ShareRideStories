@@ -64,7 +64,8 @@ export function useStories(plateNumber?: string) {
     stories,
     loading,
     error,
-    refetch: fetchStories
+    refetch: fetchStories,
+    setStories
   }
 }
 
@@ -132,7 +133,7 @@ export function useCreateStory() {
   }
 }
 
-export function useUpvoteStory() {
+export function useUpvoteStory(onStoryUpdate?: (updatedStory: Story) => void) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -163,10 +164,15 @@ export function useUpvoteStory() {
       }
 
       if (data.success) {
-        return {
+        const updatedStory = {
           ...data.data,
           timestamp: new Date(data.data.timestamp)
         }
+        // Call the callback to update the specific story
+        if (onStoryUpdate) {
+          onStoryUpdate(updatedStory)
+        }
+        return updatedStory
       } else {
         setError(data.error || 'Failed to upvote story')
         return null

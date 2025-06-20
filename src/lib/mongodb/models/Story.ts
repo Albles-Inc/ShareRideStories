@@ -7,6 +7,7 @@ export interface IStory extends Document {
   location?: string
   rating: 'positive' | 'negative' | 'neutral'
   upvotes: number
+  upvotedBy: string[]
   userId: mongoose.Types.ObjectId
   userEmail: string
   createdAt: Date
@@ -40,6 +41,10 @@ const StorySchema = new Schema<IStory>({
     type: Number,
     default: 0,
     min: 0
+  },
+  upvotedBy: {
+    type: [String],
+    default: []
   },
   userId: {
     type: Schema.Types.ObjectId,

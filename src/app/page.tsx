@@ -9,15 +9,19 @@ import StoryList from '@/components/StoryList'
 import Loading from '@/components/Loading'
 
 export default function HomePage() {
-  const { stories, loading, error } = useStories()
-  const { upvoteStory } = useUpvoteStory()
+  const { stories, loading, error, setStories } = useStories()
+  const { upvoteStory } = useUpvoteStory((updatedStory) => {
+    // Update only the specific story in the list
+    setStories(prevStories => 
+      prevStories.map(story => 
+        story.id === updatedStory.id ? updatedStory : story
+      )
+    )
+  })
 
   const handleUpvote = async (storyId: string) => {
-    const updatedStory = await upvoteStory(storyId)
-    if (updatedStory) {
-      // Optionally refetch or update local state
-      window.location.reload() // Simple approach for now
-    }
+    await upvoteStory(storyId)
+    // No need to reload or refetch - the callback will update the state
   }
 
   const recentStories = stories
