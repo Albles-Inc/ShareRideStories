@@ -34,7 +34,9 @@ export const mockStories: Story[] = [
     timestamp: new Date('2024-06-18'),
     location: 'East Legon to Airport',
     rating: 'negative',
-    upvotes: 12
+    upvotes: 12,
+    userId: 'mock-user-1',
+    userEmail: 'user1@example.com'
   },
   {
     id: '2',
@@ -43,7 +45,9 @@ export const mockStories: Story[] = [
     timestamp: new Date('2024-06-15'),
     location: 'Tema to Accra Mall',
     rating: 'negative',
-    upvotes: 8
+    upvotes: 8,
+    userId: 'mock-user-2',
+    userEmail: 'user2@example.com'
   },
   {
     id: '3',
@@ -52,7 +56,9 @@ export const mockStories: Story[] = [
     timestamp: new Date('2024-06-19'),
     location: 'Kumasi Central',
     rating: 'positive',
-    upvotes: 15
+    upvotes: 15,
+    userId: 'mock-user-3',
+    userEmail: 'user3@example.com'
   },
   {
     id: '4',
@@ -61,7 +67,9 @@ export const mockStories: Story[] = [
     timestamp: new Date('2024-06-17'),
     location: 'Circle to Dansoman',
     rating: 'neutral',
-    upvotes: 3
+    upvotes: 3,
+    userId: 'mock-user-4',
+    userEmail: 'user4@example.com'
   },
   {
     id: '5',
@@ -70,7 +78,9 @@ export const mockStories: Story[] = [
     timestamp: new Date('2024-06-16'),
     location: 'Takoradi',
     rating: 'negative',
-    upvotes: 9
+    upvotes: 9,
+    userId: 'mock-user-5',
+    userEmail: 'user5@example.com'
   }
 ]
 

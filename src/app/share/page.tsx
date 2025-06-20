@@ -2,26 +2,25 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Story, Rating } from '@/types'
-import { loadStories, saveStories, getRatingColor, getRatingEmoji } from '@/utils'
+import { useSession } from 'next-auth/react'
+import { Rating } from '@/types'
+import { useCreateStory } from '@/hooks/useStories'
+import { getRatingColor, getRatingEmoji } from '@/utils'
 import Header from '@/components/Header'
 import Loading from '@/components/Loading'
 
 function SharePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session, status } = useSession()
   const plateFromUrl = searchParams.get('plate')
   
-  const [stories, setStories] = useState<Story[]>([])
   const [plateNumber, setPlateNumber] = useState(plateFromUrl || '')
   const [story, setStory] = useState('')
   const [location, setLocation] = useState('')
   const [rating, setRating] = useState<Rating>('neutral')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  useEffect(() => {
-    setStories(loadStories())
-  }, [])
+  
+  const { createStory, loading: isSubmitting, error } = useCreateStory()
 
   useEffect(() => {
     if (plateFromUrl) {
@@ -29,37 +28,50 @@ function SharePageContent() {
     }
   }, [plateFromUrl])
 
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth?callbackUrl=' + encodeURIComponent('/share' + (plateFromUrl ? `?plate=${plateFromUrl}` : '')))
+    }
+  }, [status, router, plateFromUrl])
+
   const handleSubmit = async () => {
     if (!story.trim() || !plateNumber.trim() || isSubmitting) return
 
-    setIsSubmitting(true)
-
-    const newStory: Story = {
-      id: Date.now().toString(),
+    const newStory = await createStory({
       plateNumber: plateNumber.toUpperCase(),
       story: story.trim(),
-      timestamp: new Date(),
       location: location.trim() || undefined,
-      rating,
-      upvotes: 0
+      rating
+    })
+
+    if (newStory) {
+      // Redirect to search page for the plate
+      router.push(`/search?plate=${encodeURIComponent(plateNumber.toUpperCase())}`)
     }
-
-    const updatedStories = [...stories, newStory]
-    setStories(updatedStories)
-    saveStories(updatedStories)
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // Redirect to search page for the plate
-    router.push(`/search?plate=${encodeURIComponent(plateNumber.toUpperCase())}`)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header showBack={true} showShareButton={false} />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      {status === 'loading' ? (
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+          <Loading message="Loading..." />
+        </div>
+      ) : !session ? (
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">You need to be signed in to share a story.</p>
+            <button 
+              onClick={() => router.push('/auth')}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-200"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      ) : (
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
           <div className="text-center mb-8">
             <div className="text-4xl mb-4">✍️</div>
@@ -139,6 +151,12 @@ function SharePageContent() {
               />
             </div>
 
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
             <button
               onClick={handleSubmit}
               disabled={!story.trim() || !plateNumber.trim() || isSubmitting}
@@ -155,7 +173,7 @@ function SharePageContent() {
             </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

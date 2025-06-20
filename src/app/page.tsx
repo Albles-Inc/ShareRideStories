@@ -1,26 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Story } from '@/types'
-import { loadStories, saveStories } from '@/utils'
+import { useStories, useUpvoteStory } from '@/hooks/useStories'
 import Header from '@/components/Header'
 import SearchBar from '@/components/SearchBar'
 import StoryList from '@/components/StoryList'
+import Loading from '@/components/Loading'
 
 export default function HomePage() {
-  const [stories, setStories] = useState<Story[]>([])
+  const { stories, loading, error } = useStories()
+  const { upvoteStory } = useUpvoteStory()
 
-  useEffect(() => {
-    setStories(loadStories())
-  }, [])
-
-  const handleUpvote = (storyId: string) => {
-    const updatedStories = stories.map(story => 
-      story.id === storyId ? { ...story, upvotes: story.upvotes + 1 } : story
-    )
-    setStories(updatedStories)
-    saveStories(updatedStories)
+  const handleUpvote = async (storyId: string) => {
+    const updatedStory = await upvoteStory(storyId)
+    if (updatedStory) {
+      // Optionally refetch or update local state
+      window.location.reload() // Simple approach for now
+    }
   }
 
   const recentStories = stories
@@ -32,7 +29,7 @@ export default function HomePage() {
       <Header />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        {/* Hero Section */}
+        {/* Hero Section - Always show immediately */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
@@ -46,27 +43,44 @@ export default function HomePage() {
             Share and discover real experiences with ride-hailing drivers. Check license plates, read community feedback, and help others stay safe.
           </p>
           
-          {/* Search Bar */}
+          {/* Search Bar - Always show immediately */}
           <div className="max-w-md mx-auto">
             <SearchBar />
           </div>
         </div>
 
-        {/* Recent Stories */}
+        {/* Recent Stories Section - Only this part shows loading */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-gray-900">Recent Community Stories</h3>
             <span className="text-sm text-gray-500">Latest feedback from riders</span>
           </div>
           
-          <StoryList 
-            stories={recentStories}
-            showViewAllButton={true}
-            onUpvote={handleUpvote}
-          />
+          {/* Only show loading/error in this section */}
+          {loading ? (
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-gray-100">
+              <Loading message="Loading recent stories..." />
+            </div>
+          ) : error ? (
+            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 text-center">
+              <p className="text-red-600 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : (
+            <StoryList 
+              stories={recentStories}
+              showViewAllButton={true}
+              onUpvote={handleUpvote}
+            />
+          )}
         </div>
 
-        {/* CTA Section */}
+        {/* CTA Section - Always show immediately */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-center text-white">
           <h3 className="text-2xl font-bold mb-4">Help Build a Safer Community</h3>
           <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
