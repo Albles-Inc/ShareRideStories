@@ -4,14 +4,17 @@ import { Story } from '@/lib/mongodb/models/Story'
 import { transformStoryFromDB } from '@/transformers'
 
 // PATCH /api/stories/[id]/upvote - Upvote a story
+
+type RouteParams = Promise<{ id: string }>
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: RouteParams }
 ) {
   try {
     await connectToDatabase()
     
-    const { id } = params
+    const { id } = await params
     
     const story = await Story.findByIdAndUpdate(
       id,

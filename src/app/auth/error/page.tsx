@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
+
 
 function AuthErrorContent() {
   const searchParams = useSearchParams()

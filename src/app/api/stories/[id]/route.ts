@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import connectToDatabase from '@/lib/mongodb/connection'
 import { Story } from '@/lib/mongodb/models/Story'
 import { transformStoryFromDB } from '@/transformers'
 
 // GET /api/stories/[id] - Get single story
+
+type RouteParams = Promise<{ id: string }>
+
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: RouteParams }
 ) {
   try {
+    const { id } = await params
+
     await connectToDatabase()
     
-    const { id } = params
-    const story = await Story.findById(id).lean()
+    const story = await Story.findById(id)
 
     if (!story) {
       return NextResponse.json(
@@ -41,7 +46,7 @@ export async function GET(
 // DELETE /api/stories/[id] - Delete story (only by owner)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: RouteParams }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -54,8 +59,8 @@ export async function DELETE(
     }
 
     await connectToDatabase()
-    
-    const { id } = params
+
+    const { id } = await params
     const story = await Story.findById(id)
 
     if (!story) {
@@ -91,7 +96,7 @@ export async function DELETE(
 // PUT /api/stories/[id] - Update story (only by owner)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: RouteParams }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -129,8 +134,8 @@ export async function PUT(
     }
 
     await connectToDatabase()
-    
-    const { id } = params
+
+    const { id } = await params
     const existingStory = await Story.findById(id)
 
     if (!existingStory) {

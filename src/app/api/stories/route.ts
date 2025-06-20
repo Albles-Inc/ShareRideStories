@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import connectToDatabase from '@/lib/mongodb/connection'
 import { Story } from '@/lib/mongodb/models/Story'
 import { transformStoryFromDB, transformStoryForDB } from '@/transformers'
@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
-      .lean()
 
     const transformedStories = stories.map(transformStoryFromDB)
 
