@@ -10,6 +10,7 @@ import Header from '@/components/Header'
 import SearchBar from '@/components/SearchBar'
 import StoryList from '@/components/StoryList'
 import Loading from '@/components/Loading'
+import StructuredData from '@/components/StructuredData'
 
 export default function HomePage() {
   const { data: session } = useSession()
@@ -102,8 +103,10 @@ export default function HomePage() {
     .slice(0, 5)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Header />
+    <>
+      <StructuredData page="home" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Header />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Hero Section - Always show immediately */}
@@ -216,6 +219,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
