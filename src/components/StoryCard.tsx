@@ -1,7 +1,7 @@
 'use client'
 
 import { Story } from '@/types'
-import { formatDate, getRatingColor, getRatingEmoji } from '@/utils'
+import { formatDate, getRatingColor, getRatingEmoji, getCarIcon } from '@/utils'
 import Link from 'next/link'
 
 interface StoryCardProps {
@@ -28,9 +28,7 @@ export default function StoryCard({
       <div className="flex items-start justify-between mb-4">
         {showPlateNumber && (
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl flex items-center justify-center font-mono text-sm font-bold text-gray-700">
-              {story.plateNumber.slice(-2)}
-            </div>
+            {getCarIcon(story.plateNumber)}
             <div>
               <div className="font-mono text-sm font-semibold text-gray-900">{story.plateNumber}</div>
               <div className="text-xs text-gray-500">{story.location}</div>
