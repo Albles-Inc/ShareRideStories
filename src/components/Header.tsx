@@ -35,11 +35,11 @@ export default function Header({ title, showBack = false, showShareButton = true
         <div className="flex items-center justify-between">
           {showBack ? (
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/')}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
-              <span className="text-lg">←</span>
-              <span className="font-medium">Back</span>
+              <span className="text-lg">🏠</span>
+              <span className="font-medium">Home</span>
             </button>
           ) : (
             <Link href="/" className="flex items-center space-x-3">
