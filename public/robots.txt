@@ -1,12 +1,12 @@
 User-agent: *
 Allow: /
-Allow: /about
 
 # Block sensitive pages
 Disallow: /auth
 Disallow: /api/
 Disallow: /profile
 Disallow: /share
+Disallow: /about
 
 # Sitemap location
 Sitemap: https://www.shareridestories.com/sitemap.xml
